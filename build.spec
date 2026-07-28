@@ -33,7 +33,8 @@ exe = EXE(
     [],
     name='AutoPlateBlur_V2',
     debug=False,
+    bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=true,
+    console=True,
 )
