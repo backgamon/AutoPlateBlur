@@ -63,7 +63,7 @@ def process_video(
 
         for box in boxes:
 
-            x1,y1,x2,y2 = box
+    x1,y1,x2,y2,score = box
 
             cv2.rectangle(
                 frame,
