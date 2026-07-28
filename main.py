@@ -79,10 +79,18 @@ class AutoPlateBlur:
         )[0] + "_test.mp4"
 
 
-        ffmpeg = os.path.join(
-            "ffmpeg",
-            "ffmpeg.exe"
-        )
+        import sys
+
+if getattr(sys, 'frozen', False):
+    base = sys._MEIPASS
+else:
+    base = os.path.dirname(__file__)
+
+ffmpeg = os.path.join(
+    base,
+    "ffmpeg",
+    "ffmpeg.exe"
+)
 
         cmd = [
             ffmpeg,
