@@ -23,12 +23,12 @@ jobs:
         python-version: "3.11"
 
 
-    - name: Download FFmpeg compatible NVENC
+    - name: Download FFmpeg
       shell: pwsh
       run: |
 
         Invoke-WebRequest `
-          -Uri "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.0.2-full_build.7z" `
+          -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z" `
           -OutFile "ffmpeg.7z"
 
         7z x ffmpeg.7z
