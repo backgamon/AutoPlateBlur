@@ -1,1 +1,5 @@
 pyinstaller
+opencv-python
+onnxruntime-gpu
+numpy
+pillow
