@@ -5,9 +5,13 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('ffmpeg.exe', '.')
+        ('ffmpeg.exe', '.'),
+        ('models', 'models')
     ],
-    hiddenimports=[],
+    hiddenimports=[
+        'onnxruntime',
+        'cv2'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -27,9 +31,8 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='AutoPlateBlur_V1',
+    name='AutoPlateBlur_V2',
     debug=False,
-    bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     console=False,
