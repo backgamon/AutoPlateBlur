@@ -85,7 +85,7 @@ jobs:
     - name: Build EXE
       run: |
 
-        pyinstaller build.spec
+        pyinstaller --clean build.spec
 
 
 
