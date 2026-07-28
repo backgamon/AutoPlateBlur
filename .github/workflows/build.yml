@@ -24,11 +24,18 @@ jobs:
 
 
     - name: Download FFmpeg
-      shell: cmd
+      shell: pwsh
       run: |
-        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.zip -o ffmpeg.zip
-        tar -xf ffmpeg.zip
-        copy ffmpeg-7.1.1-full_build\bin\ffmpeg.exe ffmpeg.exe
+        Invoke-WebRequest `
+          -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z" `
+          -OutFile "ffmpeg.7z"
+
+        7z x ffmpeg.7z
+
+        $folder = Get-ChildItem -Directory -Filter "ffmpeg-*" | Select-Object -First 1
+
+        Copy-Item "$($folder.FullName)\bin\ffmpeg.exe" "ffmpeg.exe"
+
 
 
     - name: Install Python dependencies
