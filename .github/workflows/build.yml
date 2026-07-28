@@ -26,12 +26,12 @@ jobs:
     - name: Download FFmpeg
       shell: cmd
       run: |
-        curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -o ffmpeg.zip
+        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-7.1.1-full_build.zip -o ffmpeg.zip
         tar -xf ffmpeg.zip
-        for /d %%i in (ffmpeg-*) do copy %%i\bin\ffmpeg.exe ffmpeg.exe
+        copy ffmpeg-7.1.1-full_build\bin\ffmpeg.exe ffmpeg.exe
 
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         pip install -r requirements.txt
 
