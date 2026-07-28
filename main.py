@@ -11,7 +11,7 @@ class AutoPlateBlur:
     def __init__(self, root):
 
         self.root = root
-        root.title("AutoPlateBlur V1.1")
+        root.title("AutoPlateBlur V1.2")
         root.geometry("550x280")
 
         self.video = None
@@ -111,7 +111,7 @@ class AutoPlateBlur:
 
         output = os.path.splitext(
             self.video
-        )[0] + "_blur_test.mp4"
+        )[0] + "_test.mp4"
 
 
         ffmpeg = self.get_ffmpeg()
@@ -126,15 +126,12 @@ class AutoPlateBlur:
             "-i",
             self.video,
 
-            # vidéo NVIDIA
+            # Encodage CPU temporaire
             "-c:v",
-            "h264_nvenc",
+            "libx264",
 
             "-preset",
-            "p5",
-
-            "-profile:v",
-            "high",
+            "fast",
 
             "-pix_fmt",
             "yuv420p",
@@ -142,7 +139,7 @@ class AutoPlateBlur:
             "-b:v",
             "8M",
 
-            # audio compatible
+            # Audio compatible
             "-c:a",
             "aac",
 
@@ -175,18 +172,24 @@ class AutoPlateBlur:
                 )
 
 
+                messagebox.showinfo(
+                    "Terminé",
+                    "Vidéo créée :\n" + output
+                )
+
+
             else:
 
                 error = result.stderr.decode(
                     errors="ignore"
                 )
 
-                print(error)
 
                 messagebox.showerror(
                     "Erreur FFmpeg",
                     error[-1500:]
                 )
+
 
                 self.progress.config(
                     text="Erreur FFmpeg"
