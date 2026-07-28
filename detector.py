@@ -9,38 +9,36 @@ class PlateDetector:
 
         self.confidence = confidence
 
+
+        # GPU si disponible sinon CPU
         providers = [
             "CUDAExecutionProvider",
             "CPUExecutionProvider"
         ]
+
 
         self.session = ort.InferenceSession(
             model_path,
             providers=providers
         )
 
+
         self.input_name = self.session.get_inputs()[0].name
 
+
         print("===== MODELE ONNX =====")
-
-        print(
-            "Input :",
-            self.session.get_inputs()[0].shape
-        )
-
-        print(
-            "Output(s) :"
-        )
+        print("Input :", self.session.get_inputs()[0].shape)
 
         for out in self.session.get_outputs():
 
             print(
+                "Output :",
                 out.name,
-                out.shape,
-                out.type
+                out.shape
             )
 
         print("=======================")
+
 
 
     def detect(self, frame):
@@ -77,21 +75,70 @@ class PlateDetector:
         )
 
 
-        result = self.session.run(
+        output = self.session.run(
             None,
             {
                 self.input_name: img
             }
-        )
+        )[0]
 
 
-        print(
-            "SORTIE MODELE :",
-            result[0].shape
-        )
+        # YOLO : (1,5,8400)
+        output = output[0]
 
 
-        # Pas de détection pour l'instant
-        # On veut uniquement connaître le format
+        # passage en (8400,5)
+        output = output.transpose(1,0)
 
-        return []
+
+        boxes = []
+
+
+        for det in output:
+
+            x,y,bw,bh,score = det
+
+
+            if score < self.confidence:
+                continue
+
+
+            # conversion 640 -> image originale
+
+            x1 = int(
+                (x - bw/2) * w / 640
+            )
+
+            y1 = int(
+                (y - bh/2) * h / 640
+            )
+
+            x2 = int(
+                (x + bw/2) * w / 640
+            )
+
+            y2 = int(
+                (y + bh/2) * h / 640
+            )
+
+
+            # sécurité image
+
+            x1=max(0,x1)
+            y1=max(0,y1)
+            x2=min(w,x2)
+            y2=min(h,y2)
+
+
+            boxes.append(
+                (
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    float(score)
+                )
+            )
+
+
+        return boxes
