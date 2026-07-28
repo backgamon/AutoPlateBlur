@@ -9,6 +9,8 @@ a = Analysis(
         ('models', 'models')
     ],
     hiddenimports=[
+        'detector',
+        'video',
         'onnxruntime',
         'cv2'
     ],
