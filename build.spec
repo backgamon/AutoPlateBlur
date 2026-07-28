@@ -5,14 +5,21 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-    ('ffmpeg.exe','.')
-],
+        ('ffmpeg.exe', '.')
     ],
     hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
     noarchive=False,
 )
 
-pyz = PYZ(a.pure)
+
+pyz = PYZ(
+    a.pure
+)
+
 
 exe = EXE(
     pyz,
@@ -22,6 +29,7 @@ exe = EXE(
     [],
     name='AutoPlateBlur_V1',
     debug=False,
+    bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     console=False,
