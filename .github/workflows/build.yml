@@ -1,8 +1,12 @@
-name: Build Windows EXE
+name: Build AutoPlateBlur V2
+
 
 on:
+
   workflow_dispatch:
+
   push:
+
 
 
 jobs:
@@ -11,16 +15,40 @@ jobs:
 
     runs-on: windows-latest
 
+
     steps:
+
 
     - name: Checkout
       uses: actions/checkout@v4
 
 
+
     - name: Setup Python
       uses: actions/setup-python@v5
+
       with:
+
         python-version: "3.11"
+
+
+
+    - name: Create folders
+      shell: pwsh
+      run: |
+
+        New-Item -ItemType Directory -Force -Path models
+
+
+
+    - name: Download AI model
+      shell: pwsh
+      run: |
+
+        Invoke-WebRequest `
+          -Uri "https://huggingface.co/0xnu/european-license-plate-recognition/resolve/main/model.onnx" `
+          -OutFile "models/plate.onnx"
+
 
 
     - name: Download FFmpeg
@@ -31,26 +59,41 @@ jobs:
           -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z" `
           -OutFile "ffmpeg.7z"
 
+
         7z x ffmpeg.7z
 
-        $folder = Get-ChildItem -Directory -Filter "ffmpeg-*" | Select-Object -First 1
 
-        Copy-Item "$($folder.FullName)\bin\ffmpeg.exe" "ffmpeg.exe"
+        $folder = Get-ChildItem `
+          -Directory `
+          -Filter "ffmpeg-*" |
+          Select-Object -First 1
+
+
+        Copy-Item `
+          "$($folder.FullName)\bin\ffmpeg.exe" `
+          "ffmpeg.exe"
 
 
 
-    - name: Install Python dependencies
+    - name: Install dependencies
       run: |
+
         pip install -r requirements.txt
+
 
 
     - name: Build EXE
       run: |
+
         pyinstaller build.spec
+
 
 
     - name: Upload EXE
       uses: actions/upload-artifact@v4
+
       with:
-        name: AutoPlateBlur_V1
+
+        name: AutoPlateBlur_V2
+
         path: dist/
