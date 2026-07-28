@@ -22,12 +22,20 @@ jobs:
         python-version: "3.11"
 
 
-    - name: Install
+    - name: Download FFmpeg
+      run: |
+        curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip -o ffmpeg.zip
+        tar -xf ffmpeg.zip
+        mkdir ffmpeg
+        copy ffmpeg-*/bin/ffmpeg.exe ffmpeg/ffmpeg.exe
+
+
+    - name: Install Python packages
       run: |
         pip install -r requirements.txt
 
 
-    - name: Build
+    - name: Build EXE
       run: |
         pyinstaller build.spec
 
