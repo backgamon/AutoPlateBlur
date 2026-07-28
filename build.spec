@@ -5,7 +5,8 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('ffmpeg', 'ffmpeg')
+    ('ffmpeg.exe','.')
+],
     ],
     hiddenimports=[],
     noarchive=False,
