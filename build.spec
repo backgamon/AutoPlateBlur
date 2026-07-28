@@ -2,10 +2,13 @@
 
 a = Analysis(
     ['main.py'],
+    pathex=[],
+    binaries=[],
     datas=[
-        ('ffmpeg','ffmpeg')
+        ('ffmpeg', 'ffmpeg')
     ],
     hiddenimports=[],
+    noarchive=False,
 )
 
 pyz = PYZ(a.pure)
@@ -13,6 +16,12 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
+    [],
     name='AutoPlateBlur_V1',
-    console=False
+    debug=False,
+    strip=False,
+    upx=True,
+    console=False,
 )
