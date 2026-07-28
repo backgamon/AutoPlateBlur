@@ -1,67 +1,81 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import subprocess
 import os
 import threading
 import sys
 
+from detector import PlateDetector
+from video import process_video
+
+
 
 class AutoPlateBlur:
 
+
     def __init__(self, root):
 
-        self.root = root
-        root.title("AutoPlateBlur V1.2")
-        root.geometry("550x280")
+        self.root=root
 
-        self.video = None
-
-        self.label = tk.Label(
-            root,
-            text="Choisir une vidéo MP4/MOV",
-            font=("Arial", 14)
+        root.title(
+            "AutoPlateBlur V2.1"
         )
-        self.label.pack(pady=20)
+
+        root.geometry(
+            "550x300"
+        )
+
+        self.video=None
 
 
-        self.btn = tk.Button(
+        self.label=tk.Label(
             root,
-            text="Choisir une vidéo",
+            text="Choisir vidéo"
+        )
+
+        self.label.pack(
+            pady=20
+        )
+
+
+        tk.Button(
+            root,
+            text="Choisir",
             command=self.choose
-        )
-        self.btn.pack()
+        ).pack()
 
 
-        self.progress = tk.Label(
+        self.status=tk.Label(
             root,
-            text="Attente..."
+            text="Attente"
         )
-        self.progress.pack(pady=20)
+
+        self.status.pack(
+            pady=20
+        )
 
 
-        self.export = tk.Button(
+        tk.Button(
             root,
-            text="Exporter",
+            text="Analyser",
             command=self.start
-        )
-        self.export.pack()
+        ).pack()
 
 
 
     def choose(self):
 
-        file = filedialog.askopenfilename(
+        self.video=filedialog.askopenfilename(
             filetypes=[
-                ("Vidéos", "*.mp4 *.mov *.mkv *.avi")
+                ("Video","*.mp4 *.mov")
             ]
         )
 
-        if file:
-
-            self.video = file
+        if self.video:
 
             self.label.config(
-                text=os.path.basename(file)
+                text=os.path.basename(
+                    self.video
+                )
             )
 
 
@@ -72,146 +86,83 @@ class AutoPlateBlur:
 
             messagebox.showwarning(
                 "Erreur",
-                "Choisis une vidéo"
+                "Choisir une vidéo"
             )
 
             return
 
 
-        thread = threading.Thread(
-            target=self.convert,
+        threading.Thread(
+            target=self.run,
             daemon=True
-        )
-
-        thread.start()
+        ).start()
 
 
 
-    def get_ffmpeg(self):
+    def run(self):
 
-        if getattr(sys, "frozen", False):
+        if getattr(sys,"frozen",False):
 
-            base = sys._MEIPASS
+            base=sys._MEIPASS
 
         else:
 
-            base = os.path.dirname(
+            base=os.path.dirname(
                 os.path.abspath(__file__)
             )
 
 
-        return os.path.join(
+        model=os.path.join(
             base,
-            "ffmpeg.exe"
+            "models",
+            "plate.onnx"
         )
 
 
-
-    def convert(self):
-
-        output = os.path.splitext(
-            self.video
-        )[0] + "_test.mp4"
+        detector=PlateDetector(
+            model
+        )
 
 
-        ffmpeg = self.get_ffmpeg()
+        output=self.video.replace(
+            ".mp4",
+            "_detect.mp4"
+        )
 
 
-        cmd = [
-
-            ffmpeg,
-
-            "-y",
-
-            "-i",
+        process_video(
             self.video,
-
-            # Encodage CPU temporaire
-            "-c:v",
-            "libx264",
-
-            "-preset",
-            "fast",
-
-            "-pix_fmt",
-            "yuv420p",
-
-            "-b:v",
-            "8M",
-
-            # Audio compatible
-            "-c:a",
-            "aac",
-
-            "-b:a",
-            "192k",
-
-            output
-        ]
-
-
-
-        self.progress.config(
-            text="Conversion en cours..."
+            output,
+            detector,
+            self.progress
         )
 
 
-        try:
-
-            result = subprocess.run(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-
-
-            if result.returncode == 0:
-
-                self.progress.config(
-                    text="Terminé :\n" + output
-                )
-
-
-                messagebox.showinfo(
-                    "Terminé",
-                    "Vidéo créée :\n" + output
-                )
-
-
-            else:
-
-                error = result.stderr.decode(
-                    errors="ignore"
-                )
-
-
-                messagebox.showerror(
-                    "Erreur FFmpeg",
-                    error[-1500:]
-                )
-
-
-                self.progress.config(
-                    text="Erreur FFmpeg"
-                )
+        self.status.config(
+            text="Terminé : "+output
+        )
 
 
 
-        except Exception as e:
+    def progress(
+        self,
+        current,
+        total
+    ):
 
-            messagebox.showerror(
-                "Erreur",
-                str(e)
-            )
+        self.status.config(
+            text=f"{current}/{total}"
+        )
 
 
 
 
+if __name__=="__main__":
 
-if __name__ == "__main__":
+    root=tk.Tk()
 
-    root = tk.Tk()
-
-    app = AutoPlateBlur(root)
+    app=AutoPlateBlur(
+        root
+    )
 
     root.mainloop()
