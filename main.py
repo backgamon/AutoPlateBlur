@@ -11,8 +11,8 @@ class AutoPlateBlur:
     def __init__(self, root):
 
         self.root = root
-        root.title("AutoPlateBlur V1")
-        root.geometry("500x250")
+        root.title("AutoPlateBlur V1.1")
+        root.geometry("550x280")
 
         self.video = None
 
@@ -52,7 +52,7 @@ class AutoPlateBlur:
 
         file = filedialog.askopenfilename(
             filetypes=[
-                ("Vidéos", "*.mp4 *.mov *.mkv")
+                ("Vidéos", "*.mp4 *.mov *.mkv *.avi")
             ]
         )
 
@@ -79,22 +79,16 @@ class AutoPlateBlur:
 
 
         thread = threading.Thread(
-            target=self.convert
+            target=self.convert,
+            daemon=True
         )
 
         thread.start()
 
 
 
-    def convert(self):
+    def get_ffmpeg(self):
 
-        output = os.path.splitext(
-            self.video
-        )[0] + "_test.mp4"
-
-
-
-        # Gestion chemin PyInstaller
         if getattr(sys, "frozen", False):
 
             base = sys._MEIPASS
@@ -106,29 +100,54 @@ class AutoPlateBlur:
             )
 
 
-        ffmpeg = os.path.join(
+        return os.path.join(
             base,
-            "ffmpeg",
             "ffmpeg.exe"
         )
 
+
+
+    def convert(self):
+
+        output = os.path.splitext(
+            self.video
+        )[0] + "_blur_test.mp4"
+
+
+        ffmpeg = self.get_ffmpeg()
 
 
         cmd = [
 
             ffmpeg,
 
+            "-y",
+
             "-i",
             self.video,
 
+            # vidéo NVIDIA
             "-c:v",
             "h264_nvenc",
 
             "-preset",
             "p5",
 
+            "-profile:v",
+            "high",
+
+            "-pix_fmt",
+            "yuv420p",
+
+            "-b:v",
+            "8M",
+
+            # audio compatible
             "-c:a",
-            "copy",
+            "aac",
+
+            "-b:a",
+            "192k",
 
             output
         ]
@@ -138,7 +157,6 @@ class AutoPlateBlur:
         self.progress.config(
             text="Conversion en cours..."
         )
-
 
 
         try:
@@ -163,22 +181,20 @@ class AutoPlateBlur:
                     errors="ignore"
                 )
 
-                self.progress.config(
-                    text="Erreur FFmpeg"
-                )
+                print(error)
 
                 messagebox.showerror(
-                    "FFmpeg",
-                    error[-1000:]
+                    "Erreur FFmpeg",
+                    error[-1500:]
+                )
+
+                self.progress.config(
+                    text="Erreur FFmpeg"
                 )
 
 
 
         except Exception as e:
-
-            self.progress.config(
-                text="Erreur"
-            )
 
             messagebox.showerror(
                 "Erreur",
